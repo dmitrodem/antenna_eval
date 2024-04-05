@@ -1,0 +1,13 @@
+.lock
+*.afo
+*.bof
+*.cfm
+*.cfs
+*.cfx.bak
+*.fek
+*.out
+*.pfs
+*.pre
+*.str
+*.opt
+*.pfg
