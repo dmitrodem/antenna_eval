@@ -11,3 +11,7 @@ feko/*.pre
 feko/*.str
 feko/*.opt
 feko/*.pfg
+feko/feko_parallel_tmp_machfile*
+
+\#*
+*~
