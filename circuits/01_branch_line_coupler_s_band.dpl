@@ -1,0 +1,37 @@
+<Qucs Schematic 24.2.1>
+<Properties>
+  <View=-275,-272,2086,1033,0.826446,163,69>
+  <Grid=10,10,0>
+  <DataSet=01_branch_line_coupler_s_band.dat>
+  <DataDisplay=01_branch_line_coupler_s_band.sch>
+  <OpenDisplay=0>
+  <Script=01_branch_line_coupler_s_band.m>
+  <RunScript=0>
+  <showFrame=0>
+  <FrameText0=Название>
+  <FrameText1=Чертил:>
+  <FrameText2=Дата:>
+  <FrameText3=Версия:>
+</Properties>
+<Symbol>
+</Symbol>
+<Components>
+</Components>
+<Wires>
+</Wires>
+<Diagrams>
+  <Rect 680 420 542 390 3 #c0c0c0 1 00 1 1.9e+09 5e+07 2.5e+09 1 -52.0586 10 -3.3622 1 -1 0.2 1 315 0 225 1 0 0 "" "" "">
+	<"db_S21" #0000ff 2 3 0 0 0>
+	<"db_S31" #ff0000 2 3 0 0 0>
+  </Rect>
+  <Rect 680 878 542 388 3 #c0c0c0 1 00 1 1.9e+09 5e+07 2.5e+09 0 -220 10 -60 1 -1 0.2 1 315 0 225 1 0 0 "" "" "">
+	<"ph_S21" #0000ff 2 3 0 0 0>
+	<"ph_S31" #ff0000 2 3 0 0 0>
+  </Rect>
+  <Rect 50 400 542 390 3 #c0c0c0 1 00 1 1.9e+09 5e+07 2.5e+09 1 -61.354 10 -5.9158 1 -1 0.2 1 315 0 225 1 0 0 "" "" "">
+	<"db_S11" #0000ff 2 3 0 0 0>
+	<"db_S32" #ff0000 2 3 0 0 0>
+  </Rect>
+</Diagrams>
+<Paintings>
+</Paintings>

@@ -1,0 +1,8 @@
+# Qucs 24.2.1  /home/dmitriy/Work/demidrol.pw/antenna_eval/circuits/01_branch_line_coupler_s_band.sch
+
+SUBST:Ro4350b er="3.48" h="0.508 mm" t="18 um" tand="2e-4" rho="0.022e-6" D="0.15e-6"
+MLIN:MS1 _net0 _net1 Subst="Ro4350b" W="1.15 mm" L="43.2 mm" Model="Hammerstad" DispModel="Kirschning" Temp="26.85"
+Pac:P1 _net0 gnd Num="1" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+Pac:P2 _net1 gnd Num="2" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+.SP:SP1 Type="lin" Start="2 GHz" Stop="3 GHz" Points="200" Noise="no" NoiseIP="1" NoiseOP="2" saveCVs="no" saveAll="no"
+Eqn:Eqn1 db_S11="20*log10(S[1,1])" Export="yes"

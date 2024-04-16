@@ -1,0 +1,17 @@
+# Qucs 24.2.1  /home/dmitriy/Work/demidrol.pw/antenna_eval/circuits/01_branch_line_coupler_s_band.sch
+
+SUBST:Ro4350b er="3.48" h="0.508 mm" t="18 um" tand="2e-4" rho="0.022e-6" D="0.15e-6"
+MLIN:MS2 _net0 _net1 Subst="Ro4350b" W="w2" L="l2" Model="Hammerstad" DispModel="Kirschning" Temp="26.85"
+Pac:P2 _net2 gnd Num="2" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+Pac:P3 _net3 gnd Num="3" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+Pac:P4 _net4 gnd Num="4" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+.SP:SP1 Type="lin" Start="1.9 GHz" Stop="2.5 GHz" Points="201" Noise="no" NoiseIP="1" NoiseOP="2" saveCVs="no" saveAll="no"
+MTEE:MS5 _net5 _net6 _net7 Subst="Ro4350b" W1="w1" W2="w2" W3="w1" MSModel="Hammerstad" MSDispModel="Kirschning" Temp="26.85"
+MTEE:MS6 _net4 _net0 _net8 Subst="Ro4350b" W1="w1" W2="w2" W3="w1" MSModel="Hammerstad" MSDispModel="Kirschning" Temp="26.85"
+MTEE:MS7 _net3 _net1 _net9 Subst="Ro4350b" W1="w1" W2="w2" W3="w1" MSModel="Hammerstad" MSDispModel="Kirschning" Temp="26.85"
+MTEE:MS8 _net2 _net10 _net11 Subst="Ro4350b" W1="w1" W2="w2" W3="w1" MSModel="Hammerstad" MSDispModel="Kirschning" Temp="26.85"
+Pac:P1 _net5 gnd Num="1" Z="50 Ohm" P="0 dBm" f="1 MHz" Temp="26.85"
+MLIN:MS3 _net7 _net8 Subst="Ro4350b" W="w1" L="l1" Model="Hammerstad" DispModel="Kirschning" Temp="26.85"
+MLIN:MS4 _net9 _net11 Subst="Ro4350b" W="w1" L="l1" Model="Hammerstad" DispModel="Kirschning" Temp="26.85"
+Eqn:Eqn1 w1="1.13e-3" l1="20.2e-3" w2="1.91e-3" l2="l1" db_S21="dB(S[2,1])" ph_S21="rad2deg(unwrap(arg(S[2,1])))" ph_S31="rad2deg(unwrap(arg(S[3,1])))" db_S31="dB(S[3,1])" db_S32="dB(S[3,2])" db_S11="dB(S[1,1])" Export="yes"
+MLIN:MS1 _net6 _net10 Subst="Ro4350b" W="w2" L="l2" Model="Hammerstad" DispModel="Kirschning" Temp="26.85"
