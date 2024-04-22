@@ -19,11 +19,11 @@ CAD-модели антенны (сетки) можно взять из [[fig:01
 
 #+CAPTION: STEP-модель антенны
 #+NAME: fig:01:step_model
-[[file:~/Work/demidrol.pw/antenna_eval/feko/24_turnstile_linear.stp]]
+[[file:24_turnstile_linear/24_turnstile_linear.stp]]
 
 #+CAPTION: Расчетная сетка модели антенны
 #+NAME: fig:02:stl_model
-[[file:~/Work/demidrol.pw/antenna_eval/feko/24_turnstile_linear.stl]]
+[[file:24_turnstile_linear/24_turnstile_linear.stl]]
 
 Антенна запитывается с помощью симметричного порта, концы которого подключаются к плечам антенны.
 1. Для симметризации линии (микрополоска или коаксиального кабеля) *необходимо* использовать тот или иной balun. Для этой антенны, вероятно, лучшим решением был бы готовый балун, не трансформирующий импеданс (1:1, а не 1:4).
