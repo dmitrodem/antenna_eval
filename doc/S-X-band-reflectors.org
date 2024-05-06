@@ -24,6 +24,7 @@ D = \left(\cfrac{\pi d}{\lambda}\right)^2 \cdot \epsilon_a
   import matplotlib.pyplot as plt
   import numpy as np
 
+  matplotlib.use('Agg')
   freqs = np.linspace(2, 3, num = 1001)
   l0 = 3e8/(freqs * 1e9)
   D = 3.5

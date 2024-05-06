@@ -103,7 +103,42 @@ CAD-модели антенны (сетки) можно взять из [[fig:01
 #+NAME: fig:02:gain_3d
 [[file:26_turnstile_with_sat/gain_total_3d.png]]
 
+#+HEADER: :export both
+#+NAME: script:02:solid_angle_ratio
+#+begin_src python :results file link
+  import numpy as np
+  import matplotlib
 
+  matplotlib.use('Agg')
+
+  import matplotlib.pyplot as plt
+  
+  data = np.loadtxt("../feko/26_turnstile_with_sat_FarField1.ffe", skiprows = 15)
+  theta, phi, gain = tuple(map(lambda x: x.reshape(361, 181), [np.deg2rad(data[:, 0]), np.deg2rad(data[:, 1]), data[:, -1]]))
+
+  gain_min = np.linspace(-6, 3, num = 101)
+  area_factor = np.asarray([np.trapz(x = phi[:, 0], y = np.trapz(x = theta[0, :], y = (gain > _g) * np.sin(theta)))/4/np.pi for _g in gain_min])
+
+  fig = plt.figure()
+  plt.plot(gain_min, area_factor)
+  plt.xlabel("$G_{min}$ [dBi]")
+  plt.ylabel("Solid angle ratio")
+  fig.tight_layout()
+  plt.grid()
+
+  fname = "images/1solid_angle_ratio.png"
+  plt.savefig(fname)
+  return fname
+#+end_src
+
+#+RESULTS: script:02:solid_angle_ratio
+[[file:images/1solid_angle_ratio.png]]
+
+#+CAPTION: Коэффициент заполнения телесного угла областью с G > gmin
+#+NAME: fig:02:solid_angle_ratio
+[[file:images/1solid_angle_ratio.png]]
+
+#+RESULTS:
 
 ** Турникетная антенна из IF-элементов
 
