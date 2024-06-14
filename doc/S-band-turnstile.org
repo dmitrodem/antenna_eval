@@ -103,7 +103,8 @@ CAD-модели антенны (сетки) можно взять из [[fig:01
 #+NAME: fig:02:gain_3d
 [[file:26_turnstile_with_sat/gain_total_3d.png]]
 
-#+HEADER: :export both
+#+CAPTION: Коэффициент заполнения телесного угла областью с G > gmin
+#+HEADER: :export results
 #+NAME: script:02:solid_angle_ratio
 #+begin_src python :results file link
   import numpy as np
@@ -131,11 +132,9 @@ CAD-модели антенны (сетки) можно взять из [[fig:01
   return fname
 #+end_src
 
+#+NAME: xxx
+#+CAPTION: Коэффициент направленного действия для X-диапазона
 #+RESULTS: script:02:solid_angle_ratio
-[[file:images/1solid_angle_ratio.png]]
-
-#+CAPTION: Коэффициент заполнения телесного угла областью с G > gmin
-#+NAME: fig:02:solid_angle_ratio
 [[file:images/1solid_angle_ratio.png]]
 
 #+RESULTS:
