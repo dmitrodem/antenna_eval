@@ -15,6 +15,7 @@ feko/feko_parallel_tmp_machfile*
 feko/*_opt_*.cfx
 feko/*.log
 feko/*.ops
+hfss/*.hfssresults
 
 \#*
 *~
