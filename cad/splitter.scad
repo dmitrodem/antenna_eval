@@ -51,7 +51,6 @@ module splitter() {
 
   xmove(-feed_offset)
     xmove(-za_length/2)
-    yflip_copy()
     xflip_copy()
     union() {
     stroke(p1, width = za_width);
@@ -76,8 +75,8 @@ module feedlines_splitter(standalone = true) {
                "untilx", -gnd_width/2],
               state = [[point2],[1,0],90,0]);
 
-  yflip_copy()
-    union() {
+
+  union() {
     if (standalone) {
     stroke(p3, width = zb_width, endcap2 = "butt");
     }
@@ -87,8 +86,6 @@ module feedlines_splitter(standalone = true) {
 
 module slots() {
   color("blue")
-    down(1)
-    yflip_copy()
     zrot(45)
     xmove(slot_offset)
     rect(size = [slot_width1, slot_length1]) {
@@ -133,12 +130,11 @@ module feedlines_antenna(standalone = true) {
                "untilx", -gnd_width/2],
               state = [[point1],[1,0],90,0]);
 
-  yflip_copy() {
-    stroke(p5, width = microstrip_width);
-    stroke(p6, width = microstrip_width);
-    if (standalone) {
-      stroke(p7, width = microstrip_width, endcap2 = "butt");
-    }
+
+  stroke(p5, width = microstrip_width);
+  stroke(p6, width = microstrip_width);
+  if (standalone) {
+    stroke(p7, width = microstrip_width, endcap2 = "butt");
   }
 }
 
