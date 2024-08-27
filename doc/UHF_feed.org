@@ -1,0 +1,40 @@
+* Питающая цепь для диполя 433 МГц
+
+Питающая цепь представляет собой аналог rat-race coupler, собранный на
+дискретных элементах. На схеме (рис. [[fig:00:schematic]]) порты имеют
+следующие назначения:
+
+1. Port1 -- сумма
+2. Port2 -- первый аргумент
+3. Port3 -- второй аргумент
+4. Port4 -- разность
+
+Port1 терминируется сопротивлением 50 Ом, плечи диполя подключатся к
+Port2 и Port3, а питание подается на Port4.
+
+#+CAPTION: Схема питающей цепи
+#+NAME: fig:00:schematic
+[[file:circuits/02_example_433MHz/00_schematic.png]]
+
+
+Симуляция проводилась при трех различных значениях добротности индуктивностей (15, 30 и 1e6), определяемой на частоте F0 = 1 ГГц.
+
+#+CAPTION: Коэффициент отражения от входного порта
+#+NAME: fig:01:return_loss
+[[file:circuits/02_example_433MHz/01_ReturnLoss.png]]
+
+#+CAPTION: Разность фаз между портами Port2 и Port3
+#+NAME: fig:02:phase_difference
+[[file:circuits/02_example_433MHz/02_PhaseDifference.png]]
+
+#+CAPTION: Дисбаланс амплитуды между портами Port2 и Port3
+#+NAME: fig:04:amplitude_difference
+[[file:circuits/02_example_433MHz/04_AmplitudeDifference.png]]
+
+#+CAPTION: Потери в цепи
+#+NAME: fig:05:insertion_loss
+[[file:circuits/02_example_433MHz/05_InsertionLoss.png]]
+
+#+CAPTION: Коэффициент изоляции S(Port4, Port1)
+#+NAME: fig:03:isolation
+[[file:circuits/02_example_433MHz/03_Isolation.png]]
