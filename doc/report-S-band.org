@@ -1,0 +1,276 @@
+* Измерения параметров патч-антенн S-диапазона
+#+BEGIN_SRC emacs-lisp :exports none :results none
+(defun src-decorate (&optional caption attributes)
+  "A wrap function for src blocks."
+  (concat
+   "ORG\n"
+   (when attributes
+     (concat (mapconcat 'identity attributes "\n") "\n"))
+   (when caption
+     (format "#+caption: %s" caption))))
+#+END_SRC
+
+** Патч-антенна на 2.32 ГГц
+
+#+BEGIN_SRC python :session sess_2_32GHz :results none :exports none
+  import numpy as np
+  from matplotlib import pyplot as plt
+  import skrf as rf
+  from scipy.interpolate import CubicSpline
+  import pandas as pd
+
+  ref_infR  = rf.network.Network("../measurement/ref/ant_2_32GHz/patch_2_32GHz_infR.s1p")
+  meas_infR = rf.network.Network("../measurement/231101/ant_2_32_infR.s2p")
+  ref_100R  = rf.network.Network("../measurement/ref/ant_2_32GHz/patch_2_32GHz_100R.s1p")
+  meas_100R = rf.network.Network("../measurement/231101/ant_2_32_100R.s2p")
+  ref_infR.frequency.unit  = "GHz"
+  meas_infR.frequency.unit = "GHz"
+  ref_100R.frequency.unit  = "GHz"
+  meas_100R.frequency.unit = "GHz"
+
+  def get_param(network, level):
+      spl = CubicSpline(network.f, network.s11.s_db.reshape(-1))
+      freqs = np.linspace(network.f[0], network.f[-1], num = 1001)
+      ind = np.where(spl(freqs) < -15)
+      fmin, fmax = tuple(freqs[ind][[0,-1]])
+      fcenter = 0.5*(fmin + fmax)
+      bw = fmax - fmin
+      return fcenter, bw
+#+END_SRC
+
+Измерения патч-антенны проводились в двух режимах:
+1. Без резистора в цепи делителя Вилкинсона (R = $\infty$)
+2. С резистором
+
+Без резитора измерения S-параметров указывают на ширину полосы самой
+антенны. С припаянным резистором измеряется ширина полосы не антенны,
+а самого делителя (она больше ширины полосы антенны).
+
+Измерения показали, что резонансная частота антенны отличается от
+расчетной примерно на 2 процента. Поэтому для справки на графиках
+зависимости коэффициента отражения от частоты приведены как исходные
+расчетные данные, так и смещенные на эти самые 2 процента по частоте.
+
+*** Измерения без резистора (R = $\infty$)
+#+NAME: fig:2_32GHz_inf
+#+BEGIN_SRC python :session sess_2_32GHz :results graphics file value :file images/report_ant_2_32GHz_infR.svg :exports results :wrap (src-decorate "Патч 2.32 ГГц, R = $\\infty$")
+  plt.clf()
+  ref_infR.plot_s_db(label = "HFSS, original", linestyle = ':')
+  plt.plot(ref_infR.f * (1-0.02), ref_infR.s11.s_db.reshape(-1), label = "HFSS, shifted", linestyle = 'solid')
+  meas_infR.plot_s_db(m=0, n=0, label="Measured", linestyle = 'solid')
+  plt.xlim(2e9, 2.5e9)
+  plt.ylim(-40, 0)
+  plt.grid(True)
+  plt.tight_layout()
+  plt.gcf()
+#+END_SRC
+
+#+RESULTS: fig:2_32GHz_inf
+#+begin_ORG
+#+caption: Патч 2.32 ГГц, R = $\infty$
+[[file:images/report_ant_2_32GHz_infR.svg]]
+#+end_ORG
+
+#+NAME: table:2_32GHz_infR
+#+BEGIN_SRC python :session sess_2_32GHz :results table :exports results :wrap (src-decorate "Полосы частот антенны 2.32 ГГц (R = $\\infty$)")
+  df = pd.DataFrame(columns = ["Центральная частота, ГГц", "Ширина полосы, ГГц", "Ширина полосы, %"])
+  fc, bw = get_param(ref_infR, -15)
+  k = (1 - 0.02)
+  df.loc['HFSS, original'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df.loc['HFSS, shifted']  = [f"{x:.4f}" for x in [k*fc*1e-9, k*bw*1e-9, bw/fc * 100]]
+  fc, bw = get_param(meas_infR, -15)
+  df.loc['Measured'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df
+#+END_SRC
+
+#+RESULTS: table:2_32GHz_infR
+#+begin_ORG
+#+caption: Полосы частот антенны 2.32 ГГц (R = $\infty$)
+|                | Центральная частота, ГГц | Ширина полосы, ГГц | Ширина полосы, % |
+|----------------+--------------------------+--------------------+------------------|
+| HFSS, original |                   2.3220 |             0.1060 |           4.5650 |
+| HFSS, shifted  |                   2.2756 |             0.1039 |           4.5650 |
+| Measured       |                   2.2748 |             0.1125 |           4.9456 |
+#+end_ORG
+
+*** Измерения с резистором (R = 100 Ом)
+#+NAME: fig:2_32GHz_100R
+#+BEGIN_SRC python :session sess_2_32GHz :results graphics file value :file images/report_ant_2_32GHz_100R.svg :exports results :wrap (src-decorate "Патч 2.32 ГГц, R = 100 Ohm")
+  plt.clf()
+  ref_100R.plot_s_db(label = "HFSS, original", linestyle = ':')
+  plt.plot(ref_100R.f * (1-0.02), ref_100R.s11.s_db.reshape(-1), label = "HFSS, shifted", linestyle = 'solid')
+  meas_100R.plot_s_db(m=0, n=0, label="Measured", linestyle = 'solid')
+  plt.xlim(1.8e9, 2.8e9)
+  plt.grid(True)
+  plt.tight_layout()
+  plt.gcf()
+#+END_SRC
+
+#+RESULTS: fig:2_32GHz_100R
+#+begin_ORG
+#+caption: Патч 2.32 ГГц, R = 100 Ohm
+[[file:images/report_ant_2_32GHz_100R.svg]]
+#+end_ORG
+
+#+NAME: table:2_32GHz_100R
+#+BEGIN_SRC python :session sess_2_32GHz :results table :exports results :wrap (src-decorate "Полосы частот антенны 2.32 ГГц (R = 100 Ohm)")
+  df = pd.DataFrame(columns = ["Центральная частота, ГГц", "Ширина полосы, ГГц", "Ширина полосы, %"])
+  fc, bw = get_param(ref_100R, -15)
+  k = (1 - 0.02)
+  df.loc['HFSS, original'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df.loc['HFSS, shifted']  = [f"{x:.4f}" for x in [k*fc*1e-9, k*bw*1e-9, bw/fc * 100]]
+  fc, bw = get_param(meas_100R, -15)
+  df.loc['Measured'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df
+#+END_SRC
+
+#+RESULTS: table:2_32GHz_100R
+#+begin_ORG
+#+caption: Полосы частот антенны 2.32 ГГц (R = 100 Ohm)
+|                | Центральная частота, ГГц | Ширина полосы, ГГц | Ширина полосы, % |
+|----------------+--------------------------+--------------------+------------------|
+| HFSS, original |                   2.3100 |             0.5280 |          22.8571 |
+| HFSS, shifted  |                   2.2638 |             0.5174 |          22.8571 |
+| Measured       |                   2.2763 |             0.5385 |          23.6573 |
+#+end_ORG
+
+** Патч-антенна на 2.42 ГГц
+#+BEGIN_SRC python :session sess_2_42GHz :results none :exports none
+  import numpy as np
+  from matplotlib import pyplot as plt
+  import skrf as rf
+  from scipy.interpolate import CubicSpline
+  import pandas as pd
+
+  ref_infR  = rf.network.Network("../measurement/ref/ant_2_42GHz/patch_2_42GHz_infR.s1p")
+  meas_infR = rf.network.Network("../measurement/231101/ant_2_42_infR.s2p")
+  ref_100R  = rf.network.Network("../measurement/ref/ant_2_42GHz/patch_2_42GHz_100R.s1p")
+  meas_100R = rf.network.Network("../measurement/231101/ant_2_42_100R.s2p")
+  ref_infR.frequency.unit  = "GHz"
+  meas_infR.frequency.unit = "GHz"
+  ref_100R.frequency.unit  = "GHz"
+  meas_100R.frequency.unit = "GHz"
+
+  def get_param(network, level):
+      spl = CubicSpline(network.f, network.s11.s_db.reshape(-1))
+      freqs = np.linspace(network.f[0], network.f[-1], num = 1001)
+      ind = np.where(spl(freqs) < -15)
+      fmin, fmax = tuple(freqs[ind][[0,-1]])
+      fcenter = 0.5*(fmin + fmax)
+      bw = fmax - fmin
+      return fcenter, bw
+#+END_SRC
+
+*** Измерения без резистора (R = $\infty$)
+#+NAME: fig:2_42GHz_inf
+#+BEGIN_SRC python :session sess_2_42GHz :results graphics file value :file images/report_ant_2_42GHz_infR.svg :exports results :wrap (src-decorate "Патч 2.42 ГГц, R = inf")
+  plt.clf()
+  ref_infR.plot_s_db(label = "HFSS, original", linestyle = ':')
+  plt.plot(ref_infR.f * (1-0.02), ref_infR.s11.s_db.reshape(-1), label = "HFSS, shifted", linestyle = 'solid')
+  meas_infR.plot_s_db(m=0, n=0, label="Measured", linestyle = 'solid')
+  plt.xlim(2.1e9, 2.6e9)
+  plt.ylim(-35, 0)
+  plt.grid(True)
+  plt.tight_layout()
+  plt.gcf()
+#+END_SRC
+
+#+RESULTS: fig:2_42GHz_inf
+#+begin_ORG
+#+caption: Патч 2.42 ГГц, R = inf
+[[file:images/report_ant_2_42GHz_infR.svg]]
+#+end_ORG
+
+#+NAME: table:2_42GHz_infR
+#+BEGIN_SRC python :session sess_2_42GHz :results table :exports results :wrap (src-decorate "Полосы частот антенны 2.42 ГГц (R = \infty)")
+  df = pd.DataFrame(columns = ["Центральная частота, ГГц", "Ширина полосы, ГГц", "Ширина полосы, %"])
+  fc, bw = get_param(ref_infR, -15)
+  k = (1 - 0.02)
+  df.loc['HFSS, original'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df.loc['HFSS, shifted']  = [f"{x:.4f}" for x in [k*fc*1e-9, k*bw*1e-9, bw/fc * 100]]
+  fc, bw = get_param(meas_infR, -15)
+  df.loc['Measured'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df
+#+END_SRC
+
+#+RESULTS: table:2_42GHz_infR
+#+begin_ORG
+#+caption: Полосы частот антенны 2.42 ГГц (R = infty)
+|                | Центральная частота, ГГц | Ширина полосы, ГГц | Ширина полосы, % |
+|----------------+--------------------------+--------------------+------------------|
+| HFSS, original |                   2.4250 |             0.1160 |           4.7835 |
+| HFSS, shifted  |                   2.3765 |             0.1137 |           4.7835 |
+| Measured       |                   2.3768 |             0.1155 |           4.8596 |
+#+end_ORG
+
+*** Измерения с резистором (R = 100 Ом)
+#+NAME: fig:2_42GHz_100R
+#+BEGIN_SRC python :session sess_2_42GHz :results graphics file value :file images/report_ant_2_42GHz_100R.svg :exports results :wrap (src-decorate "Патч 2.42 ГГц, R = 100 Ohm")
+  plt.clf()
+  ref_100R.plot_s_db(label = "HFSS, original", linestyle = ':')
+  plt.plot(ref_100R.f * (1-0.02), ref_100R.s11.s_db.reshape(-1), label = "HFSS, shifted", linestyle = 'solid')
+  meas_100R.plot_s_db(m=0, n=0, label="Measured", linestyle = 'solid')
+  plt.xlim(2.0e9, 2.8e9)
+  plt.ylim(-40, 0)
+  plt.grid(True)
+  plt.tight_layout()
+  plt.gcf()
+#+END_SRC
+
+#+RESULTS: fig:2_42GHz_100R
+#+begin_ORG
+#+caption: Патч 2.42 ГГц, R = 100 Ohm
+[[file:images/report_ant_2_42GHz_100R.svg]]
+#+end_ORG
+
+
+#+NAME: table:2_42GHz_100R
+#+BEGIN_SRC python :session sess_2_42GHz :results table :exports results :wrap (src-decorate "Полосы частот антенны 2.42 ГГц (R = 100 Ohm)")
+  df = pd.DataFrame(columns = ["Центральная частота, ГГц", "Ширина полосы, ГГц", "Ширина полосы, %"])
+  fc, bw = get_param(ref_100R, -15)
+  k = (1 - 0.02)
+  df.loc['HFSS, original'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df.loc['HFSS, shifted']  = [f"{x:.4f}" for x in [k*fc*1e-9, k*bw*1e-9, bw/fc * 100]]
+  fc, bw = get_param(meas_100R, -15)
+  df.loc['Measured'] = [f"{x:.4f}" for x in [fc*1e-9, bw*1e-9, bw/fc * 100]]
+  df
+#+END_SRC
+
+#+RESULTS: table:2_42GHz_100R
+#+begin_ORG
+#+caption: Полосы частот антенны 2.42 ГГц (R = 100 Ohm)
+|                | Центральная частота, ГГц | Ширина полосы, ГГц | Ширина полосы, % |
+|----------------+--------------------------+--------------------+------------------|
+| HFSS, original |                   2.4215 |             0.4290 |          17.7163 |
+| HFSS, shifted  |                   2.3731 |             0.4204 |          17.7163 |
+| Measured       |                   2.3843 |             0.4815 |          20.1950 |
+#+end_ORG
+
+** Оценка коэффициента усиления антенн
+Две антенны размещались на расстоянии около 1 метра друг от друга и
+подключались к портам векторного анализатора цепей. Далее вариацией
+взаимного поворота антенн и высоты установки подбиралось положение,
+максимизирующее коэффициент передачи S_{21}.
+
+Для одинаковых антенн по формулу Фрииса можно оценить значение
+коэффициента усиления:
+\begin{equation*}
+G = \cfrac{1}{2} \left(S_{21} - 20 \lg{\cfrac{\lambda}{4 \pi D}}\right)
+\end{equation*}
+
+Полученное в результате измерений значение (5..6 дБи) хорошо
+согласуется с расчетным (5.7 дБи).
+
+** Заключение
+Обе антенны имеют похожие характеристики:
+1. Ширина полосы антенны без делителя Вилкинсона: 5 процентов
+2. Ширина полосы делителя: 20 процентов
+3. Резонансные частоты отличаются от расчетных на 2 процента в меньшую сторону
+4. Предварительно подтвержден коэффициент усиления антенн
+
+По итогу -- требуется коррекция размера патч-антенн с учетом
+фактической резонансной частоты.
+
+# Local Variables:
+# org-confirm-babel-evaluate: nil
+# End:
