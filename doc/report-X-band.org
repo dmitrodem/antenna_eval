@@ -1,0 +1,84 @@
+* Измерения параметров антенной решетки 4x4 с центральной частотой 8.2 ГГц
+#+BEGIN_SRC emacs-lisp :exports none
+(defun src-decorate (&optional caption attributes)
+  "A wrap function for src blocks."
+  (concat
+   "ORG\n"
+   (when attributes
+     (concat (mapconcat 'identity attributes "\n") "\n"))
+   (when caption
+     (format "#+caption: %s" caption))))
+#+END_SRC
+
+** Измерение коэффициента отражения
+
+#+BEGIN_SRC python :session sess_8_2ghz :results none :exports none
+  import numpy as np
+  from matplotlib import pyplot as plt
+  import skrf as rf
+  from scipy.interpolate import CubicSpline
+  import pandas as pd
+
+  ref_100R  = rf.network.Network("../measurement/250430/ansys_8_2ghz.s1p")
+  meas_100R = rf.network.Network("../measurement/250430/array_8_2ghz.s2p")
+  ref_100R.frequency.unit  = "GHz"
+  meas_100R.frequency.unit = "GHz"
+
+  def get_param(network, level):
+      spl = CubicSpline(network.f, network.s11.s_db.reshape(-1))
+      freqs = np.linspace(network.f[0], network.f[-1], num = 1001)
+      ind = np.where(spl(freqs) < -15)
+      fmin, fmax = tuple(freqs[ind][[0,-1]])
+      fcenter = 0.5*(fmin + fmax)
+      bw = fmax - fmin
+      return fcenter, bw
+#+END_SRC
+
+Для измерения использовался векторный анализатор цепей Anritsu MS4644A
+(серийный номер 091245).
+
+Были учтены следующие факторы:
+1. Влияние SMP-разъема на частотах выше 6 ГГц оказывается
+   существенным. Для его минимизации требуется либо металлизация торца
+   платы (что не было выполнено на текущем этапе), что позволяет
+   обеспечить надежный контакт внешней части разъема с земляной
+   плоскостью платы, либо исключение этого разъема.
+ 2. Для измерений жесткий коаксиальный кабель припаивался
+    непосредственно к микрополосковой линии на плате. Диэлектрик на
+    краю платы при этом частично удалялся, чтобы вскрыть полигон
+    "земли", к которому припаивалась оболочка кабеля.
+ 3. Для устранения влияния подводящего кабеля проводилась ручная
+    калибровка векторного анализатора непосредственно с пристыкованным
+    кабелем. Вместо исследуемой антенны на свободном конце кабеля
+    последовательно создавались ситуации холостого хода, короткого
+    замыкания (припаивался короткий отрезок провода) и согласованной
+    нагрузки (ее роль выполнял 50-оммный smd-резистор размером 0402,
+    припаиваемый между центральной жилой и оплеткой кабеля)
+
+#+NAME: fig:s11:100ohm
+#+BEGIN_SRC python :session sess_8_2ghz :results graphics file value :file images/xband_s11_r100.png :exports results :wrap (src-decorate "Коэффициент отражения, R = 100 Ом")
+  plt.clf()
+  ref_100R.plot_s_db(label = "HFSS, original", linestyle = ':')
+  meas_100R.plot_s_db(m=0, n=0, label="Measured", linestyle = 'solid')
+  plt.grid(True)
+  plt.gcf().set_size_inches(np.array([13, 10])/2.54)
+  plt.tight_layout()
+  plt.gcf()
+#+END_SRC
+
+#+RESULTS: fig:s11:100ohm
+#+begin_ORG
+#+caption: Коэффициент отражения, R = 100 Ом
+[[file:images/xband_s11_r100.png]]
+#+end_ORG
+
+Результаты измерений антенны с запаянными резисторами делителей
+Вилкинсона (100-оммные) приведены на [[fig:s11:100ohm]]. Видно, что
+измеренная кривая смещена на 150 МГц относительно расчетной, что
+согласуются с результатами измерений патч-антенн и говорит о
+необходимости внесения корректировки в использованное при расчете
+значение диэлектрической константы подложки (3.38).
+
+# Local Variables:
+# org-confirm-babel-evaluate: nil
+# End:
